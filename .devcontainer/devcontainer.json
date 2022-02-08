@@ -1,0 +1,8 @@
+{
+  "dockerComposeFile": "../docker-compose.yaml",
+  "service": "workspace",
+  "workspaceFolder": "/go/src/github.com/mkaiho/go-lambda-api-sample",
+  "extensions": [
+    "golang.go",
+  ]
+}
