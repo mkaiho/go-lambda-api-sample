@@ -27,6 +27,16 @@
     "@aws-cdk/core:target-partitions": [
       "aws",
       "aws-cn"
-    ]
+    ],
+    "stage": {
+      "api": {
+        "stageName": "stage"
+      }
+    },
+    "prod": {
+      "api": {
+        "stageName": "prod"
+      }
+    }
   }
 }

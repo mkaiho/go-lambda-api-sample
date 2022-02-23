@@ -19,3 +19,6 @@
 
 # SSH Key
 .ssh/
+
+# binary
+bin/
