@@ -37,6 +37,12 @@ gen-mock:
 test:
 	gotestsum ./entity/... ./usecase/... ./adapter/... ./infrastructure/...
 
+.PHONY: test-report
+test-report:
+	rm -r ./test-results
+	mkdir -p ./test-results
+	gotestsum --junitfile ./test-results/unit-tests.xml ./entity/... ./usecase/... ./adapter/... ./infrastructure/...
+
 .PHONY: clean
 clean:
 	@rm -rf ./bin
