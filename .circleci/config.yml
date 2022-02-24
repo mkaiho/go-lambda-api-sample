@@ -22,4 +22,4 @@ jobs:
           path: ./test-results
           destination: raw-test-output
       - store_test_results:
-          path: ./test-reports
+          path: ./test-results
