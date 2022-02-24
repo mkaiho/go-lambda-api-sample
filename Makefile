@@ -39,8 +39,8 @@ test:
 
 .PHONY: test-report
 test-report:
-	rm -r ./test-results
-	mkdir -p ./test-results
+	@rm -rf ./test-results
+	@mkdir -p ./test-results
 	gotestsum --junitfile ./test-results/unit-tests.xml ./entity/... ./usecase/... ./adapter/... ./infrastructure/...
 
 .PHONY: clean
