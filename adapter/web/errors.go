@@ -13,6 +13,9 @@ func makeErrorResult(err error) (*ErrorResult, ResponseStatus) {
 	case usecase.ErrorTypeNotFoundEntity:
 		e := usecase.ToErrNotFoundEntity(useCaseError)
 		return makeErrNotFound(e), ResponseStatusNotFound
+	case usecase.ErrorTypeDuplicateEntity:
+		e := usecase.ToErrDuplicateEntity(useCaseError)
+		return makeErrDuplicate(e), ResponseStatusConflict
 	case usecase.ErrorTypeFatal:
 		fallthrough
 	default:
@@ -27,7 +30,12 @@ func makeErrNotFound(err usecase.EntityNotFoundError) *ErrorResult {
 		Details: nil,
 	}
 }
-
+func makeErrDuplicate(err usecase.EntityDuplicateError) *ErrorResult {
+	return &ErrorResult{
+		Message: err.Error(),
+		Details: nil,
+	}
+}
 func makeErrInternal(err usecase.FatalError) *ErrorResult {
 	return &ErrorResult{
 		Message: err.Error(),

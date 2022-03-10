@@ -23,6 +23,10 @@ func (id *ulid) Value() string {
 	return string(id.value)
 }
 
+func (id *ulid) IsEmpty() bool {
+	return id == nil || len(id.value) == 0
+}
+
 /** ID Validator **/
 func NewULIDValidator() entity.IDValidator {
 	return &ulidValidator{}

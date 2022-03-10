@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/mkaiho/go-lambda-api-sample/adapter/dynamodb"
 	"github.com/mkaiho/go-lambda-api-sample/adapter/web"
 	"github.com/mkaiho/go-lambda-api-sample/entity"
 	"github.com/mkaiho/go-lambda-api-sample/infrastructure"
@@ -45,14 +47,30 @@ func (body *ResponseBody) bodyString() (string, error) {
 	return string(b), nil
 }
 
-// func handle(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 func handle(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var err error
+
+	// DynamoDB
+	var (
+		dynamodbClient               dynamodb.DynamoDBClient
+		dynamodbAttributeValueMapper dynamodb.AttributeValueMapper
+	)
+	{
+		dynamodbClient, err = infrastructure.NewDynamoDBClientFromEnv(os.Getenv("AWS_DEFAULT_REGION"))
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: web.ResponseStatusInternalServerError.Int(),
+				Body:       err.Error(),
+			}, err
+		}
+		dynamodbAttributeValueMapper = infrastructure.NewDynamoDBAttributeValueMapper()
+	}
 	// repository
 	var (
 		idValidator entity.IDValidator = infrastructure.NewDummyIDValidator()
 		idGenerator entity.IDGenerator = infrastructure.NewDummyIDGenerator()
 		idManager                      = entity.NewIDManager(idValidator, idGenerator)
-		usersReader entity.UsersReader = infrastructure.NewDummyUsersReader(idManager)
+		usersReader entity.UsersReader = dynamodb.NewUsersReader(idManager, dynamodbClient, dynamodbAttributeValueMapper)
 	)
 	// usecase
 	var (

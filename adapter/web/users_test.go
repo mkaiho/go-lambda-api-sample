@@ -36,16 +36,19 @@ func Test_listUsersHandler_Handle(t *testing.T) {
 				Status: ResponseStatusOK,
 				Users: []*UserDetail{
 					{
-						ID:   "001",
-						Name: "testuser_001",
+						ID:    "001",
+						Name:  "testuser_001",
+						Email: "test_001@xxx.com",
 					},
 					{
-						ID:   "002",
-						Name: "testuser_002",
+						ID:    "002",
+						Name:  "testuser_002",
+						Email: "test_002@xxx.com",
 					},
 					{
-						ID:   "003",
-						Name: "testuser_003",
+						ID:    "003",
+						Name:  "testuser_003",
+						Email: "test_003@xxx.com",
 					},
 				},
 			},
@@ -83,10 +86,13 @@ func createDummyUsers(size int) []entity.User {
 	for i := 0; i < size; i++ {
 		testUserID := new(mockentity.UserID)
 		testUserID.On("Value").Return(fmt.Sprintf("%03d", i+1))
+		testEmail := new(mockentity.Email)
+		testEmail.On("Value").Return(fmt.Sprintf("test_%03d@xxx.com", i+1))
 
 		testUser := new(mockentity.User)
 		testUser.On("UserID").Return(testUserID)
 		testUser.On("Name").Return(fmt.Sprintf("testuser_%03d", i+1))
+		testUser.On("Email").Return(testEmail)
 
 		testUsers[i] = testUser
 	}

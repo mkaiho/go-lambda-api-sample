@@ -27,6 +27,31 @@ func Test_dummyID_Value(t *testing.T) {
 	}
 }
 
+func Test_dummyID_IsEmpty(t *testing.T) {
+	tests := []struct {
+		name string
+		id   dummyID
+		want bool
+	}{
+		{
+			name: "return true when value size is 0",
+			id:   "",
+			want: true,
+		},
+		{
+			name: "return true when value size is 1",
+			id:   "x",
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.id.IsEmpty()
+			assert.Equal(t, tt.want, got, "dummyID.IsEmpty() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
 func Test_dummyIDValidator_Validate(t *testing.T) {
 	type args struct {
 		value string

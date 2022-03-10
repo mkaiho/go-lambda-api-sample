@@ -38,6 +38,41 @@ func Test_ulid_Value(t *testing.T) {
 	}
 }
 
+func Test_ulid_IsEmpty(t *testing.T) {
+	type fields struct {
+		value string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   bool
+	}{
+		{
+			name: "return true when value size is 0",
+			fields: fields{
+				value: "",
+			},
+			want: true,
+		},
+		{
+			name: "return false when value is set",
+			fields: fields{
+				value: dummyULIDValue,
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			id := &ulid{
+				value: tt.fields.value,
+			}
+			got := id.IsEmpty()
+			assert.Equal(t, tt.want, got, "ulid.IsEmpty() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
 func Test_ulidValidator_Validate(t *testing.T) {
 	type args struct {
 		value string

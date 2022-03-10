@@ -20,9 +20,8 @@ $(ZIP_BINARIES): $(BINARIES)
 
 .PHONY: dev-deps
 dev-deps:
-	go get gotest.tools/gotestsum@v1.7.0
-	go get github.com/vektra/mockery/v2/.../
-	go mod tidy
+	go install gotest.tools/gotestsum@v1.7.0
+	go install github.com/vektra/mockery/v2@latest
 
 .PHONY: deps
 deps:

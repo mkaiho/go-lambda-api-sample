@@ -13,6 +13,10 @@ func (id dummyID) Value() string {
 	return string(id)
 }
 
+func (id dummyID) IsEmpty() bool {
+	return len(id) == 0
+}
+
 /** ID Validator **/
 func NewDummyIDValidator() entity.IDValidator {
 	return &dummyIDValidator{}

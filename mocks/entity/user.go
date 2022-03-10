@@ -12,6 +12,22 @@ type User struct {
 	mock.Mock
 }
 
+// Email provides a mock function with given fields:
+func (_m *User) Email() entity.Email {
+	ret := _m.Called()
+
+	var r0 entity.Email
+	if rf, ok := ret.Get(0).(func() entity.Email); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(entity.Email)
+		}
+	}
+
+	return r0
+}
+
 // Name provides a mock function with given fields:
 func (_m *User) Name() string {
 	ret := _m.Called()

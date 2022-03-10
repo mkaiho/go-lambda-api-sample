@@ -6,8 +6,9 @@ import (
 )
 
 type UserDetail struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 /** List users **/
@@ -45,8 +46,9 @@ func (h *listUsersHandler) Handle() *ListUsersResponse {
 	details := make([]*UserDetail, len(users))
 	for i, user := range users {
 		details[i] = &UserDetail{
-			ID:   user.UserID().Value(),
-			Name: user.Name(),
+			ID:    user.UserID().Value(),
+			Name:  user.Name(),
+			Email: user.Email().Value(),
 		}
 	}
 
@@ -106,8 +108,119 @@ func (h *getUserHandler) Handle(req GetUserRequest) *GetUserResponse {
 	return &GetUserResponse{
 		Status: ResponseStatusOK,
 		User: &UserDetail{
-			ID:   user.UserID().Value(),
-			Name: user.Name(),
+			ID:    user.UserID().Value(),
+			Name:  user.Name(),
+			Email: user.Email().Value(),
 		},
+	}
+}
+
+/** Create users **/
+type (
+	CreateUserRequest struct {
+		User *UserDetail `json:"user"`
+	}
+	CreateUserResponse struct {
+		Status ResponseStatus
+		User   *UserDetail  `json:"user,omitempty"`
+		Error  *ErrorResult `json:"error,omitempty"`
+	}
+	CreateUserHandler interface {
+		Handle(req CreateUserRequest) *CreateUserResponse
+	}
+)
+
+func NewCreateUserHandler(idm entity.IDManager, createUserUseCase usecase.CreateUserUseCase) CreateUserHandler {
+	return &createUserHandler{
+		idm:               idm,
+		createUserUseCase: createUserUseCase,
+	}
+}
+
+type createUserHandler struct {
+	idm               entity.IDManager
+	createUserUseCase usecase.CreateUserUseCase
+}
+
+func (h *createUserHandler) Handle(req CreateUserRequest) *CreateUserResponse {
+	userID, err := h.idm.From(req.User.ID)
+	if err != nil {
+		errResult, status := makeErrorResult(err)
+		return &CreateUserResponse{
+			Status: status,
+			Error:  errResult,
+		}
+	}
+	email, err := entity.NewEmail(req.User.Email)
+	if err != nil {
+		errResult, status := makeErrorResult(err)
+		return &CreateUserResponse{
+			Status: status,
+			Error:  errResult,
+		}
+	}
+	user, err := h.createUserUseCase.Create(entity.NewUser(userID, req.User.Name, email))
+	if err != nil {
+		errResult, status := makeErrorResult(err)
+		return &CreateUserResponse{
+			Status: status,
+			Error:  errResult,
+		}
+	}
+	return &CreateUserResponse{
+		Status: ResponseStatusCreated,
+		User: &UserDetail{
+			ID:    user.UserID().Value(),
+			Name:  user.Name(),
+			Email: user.Email().Value(),
+		},
+	}
+}
+
+/** Delete user by ID **/
+type (
+	DeleteUserRequest struct {
+		ID string `json:"id"`
+	}
+	DeleteUserResponse struct {
+		Status ResponseStatus
+		Error  *ErrorResult `json:"error,omitempty"`
+	}
+	DeleteUserHandler interface {
+		Handle(req DeleteUserRequest) *DeleteUserResponse
+	}
+)
+
+func NewDeleteUserHandler(idm entity.IDManager, deleteUserUseCase usecase.DeleteUserUseCase) DeleteUserHandler {
+	return &deleteUserHandler{
+		idm:               idm,
+		deleteUserUseCase: deleteUserUseCase,
+	}
+}
+
+type deleteUserHandler struct {
+	idm               entity.IDManager
+	deleteUserUseCase usecase.DeleteUserUseCase
+}
+
+func (h *deleteUserHandler) Handle(req DeleteUserRequest) *DeleteUserResponse {
+	id, err := h.idm.From(req.ID)
+	if err != nil {
+		errResult, status := makeErrorResult(err)
+		return &DeleteUserResponse{
+			Status: status,
+			Error:  errResult,
+		}
+	}
+	err = h.deleteUserUseCase.Delete(id)
+	if err != nil {
+		errResult, status := makeErrorResult(err)
+		return &DeleteUserResponse{
+			Status: status,
+			Error:  errResult,
+		}
+	}
+	return &DeleteUserResponse{
+		Status: ResponseStatusNoContent,
 	}
 }

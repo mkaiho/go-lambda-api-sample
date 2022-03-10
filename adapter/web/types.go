@@ -16,14 +16,16 @@ func (s ResponseStatus) String() string {
 
 const (
 	// 2XX
-	ResponseStatusOK       ResponseStatus = http.StatusOK
-	ResponseStatusCreated  ResponseStatus = http.StatusCreated
-	ResponseStatusAccepted ResponseStatus = http.StatusAccepted
+	ResponseStatusOK        ResponseStatus = http.StatusOK
+	ResponseStatusCreated   ResponseStatus = http.StatusCreated
+	ResponseStatusAccepted  ResponseStatus = http.StatusAccepted
+	ResponseStatusNoContent ResponseStatus = http.StatusNoContent
 	// 4XX
 	ResponseStatusBadRequest   ResponseStatus = http.StatusBadRequest
 	ResponseStatusUnauthorized ResponseStatus = http.StatusUnauthorized
 	ResponseStatusForbidden    ResponseStatus = http.StatusForbidden
 	ResponseStatusNotFound     ResponseStatus = http.StatusNotFound
+	ResponseStatusConflict     ResponseStatus = http.StatusConflict
 	// 5XX
 	ResponseStatusInternalServerError ResponseStatus = http.StatusInternalServerError
 )

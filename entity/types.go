@@ -3,6 +3,7 @@ package entity
 /** ID **/
 type ID interface {
 	Value() string
+	IsEmpty() bool
 }
 
 /** ID validator **/

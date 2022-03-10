@@ -15,16 +15,14 @@ import (
 )
 
 type ResponseBody struct {
-	Result *web.UserDetail  `json:"user,omitempty"`
-	Error  *web.ErrorResult `json:"error,omitempty"`
+	Error *web.ErrorResult `json:"error,omitempty"`
 }
 
 type Response events.APIGatewayProxyResponse
 
-func NewResponse(resp *web.GetUserResponse) (*events.APIGatewayProxyResponse, error) {
+func NewResponse(resp *web.DeleteUserResponse) (*events.APIGatewayProxyResponse, error) {
 	body := &ResponseBody{
-		Result: resp.User,
-		Error:  resp.Error,
+		Error: resp.Error,
 	}
 	bs, err := body.bodyString()
 	if err != nil {
@@ -70,20 +68,20 @@ func handle(ctx context.Context, event events.APIGatewayProxyRequest) (events.AP
 		idValidator entity.IDValidator = infrastructure.NewDummyIDValidator()
 		idGenerator entity.IDGenerator = infrastructure.NewDummyIDGenerator()
 		idManager                      = entity.NewIDManager(idValidator, idGenerator)
-		usersReader entity.UsersReader = dynamodb.NewUsersReader(idManager, dynamodbClient, dynamodbAttributeValueMapper)
+		usersWriter entity.UsersWriter = dynamodb.NewUsersWriter(idManager, dynamodbClient, dynamodbAttributeValueMapper)
 	)
 	// usecase
 	var (
-		getUserUseCase usecase.GetUserUseCase = usecase.NewGetUserUseCase(usersReader)
+		deleteUserUseCase usecase.DeleteUserUseCase = usecase.NewDeleteUserUseCase(usersWriter)
 	)
 	// web handler
 	var (
-		getUserHandler web.GetUserHandler = web.NewGetUserHandler(idManager, getUserUseCase)
+		deleteUserHandler web.DeleteUserHandler = web.NewDeleteUserHandler(idManager, deleteUserUseCase)
 	)
 
 	userID := event.PathParameters["user_id"]
 
-	result := getUserHandler.Handle(web.GetUserRequest{
+	result := deleteUserHandler.Handle(web.DeleteUserRequest{
 		ID: userID,
 	})
 	resp, err := NewResponse(result)

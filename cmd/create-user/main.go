@@ -21,7 +21,7 @@ type ResponseBody struct {
 
 type Response events.APIGatewayProxyResponse
 
-func NewResponse(resp *web.GetUserResponse) (*events.APIGatewayProxyResponse, error) {
+func NewResponse(resp *web.CreateUserResponse) (*events.APIGatewayProxyResponse, error) {
 	body := &ResponseBody{
 		Result: resp.User,
 		Error:  resp.Error,
@@ -70,22 +70,27 @@ func handle(ctx context.Context, event events.APIGatewayProxyRequest) (events.AP
 		idValidator entity.IDValidator = infrastructure.NewDummyIDValidator()
 		idGenerator entity.IDGenerator = infrastructure.NewDummyIDGenerator()
 		idManager                      = entity.NewIDManager(idValidator, idGenerator)
-		usersReader entity.UsersReader = dynamodb.NewUsersReader(idManager, dynamodbClient, dynamodbAttributeValueMapper)
+		usersWriter entity.UsersWriter = dynamodb.NewUsersWriter(idManager, dynamodbClient, dynamodbAttributeValueMapper)
 	)
 	// usecase
 	var (
-		getUserUseCase usecase.GetUserUseCase = usecase.NewGetUserUseCase(usersReader)
+		createUserUseCase usecase.CreateUserUseCase = usecase.NewCreateUserUseCase(usersWriter)
 	)
 	// web handler
 	var (
-		getUserHandler web.GetUserHandler = web.NewGetUserHandler(idManager, getUserUseCase)
+		createUserHandler web.CreateUserHandler = web.NewCreateUserHandler(idManager, createUserUseCase)
 	)
 
-	userID := event.PathParameters["user_id"]
+	req := new(web.CreateUserRequest)
+	err = json.Unmarshal([]byte(event.Body), req)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: web.ResponseStatusInternalServerError.Int(),
+			Body:       err.Error(),
+		}, err
+	}
 
-	result := getUserHandler.Handle(web.GetUserRequest{
-		ID: userID,
-	})
+	result := createUserHandler.Handle(*req)
 	resp, err := NewResponse(result)
 	if err != nil {
 		return events.APIGatewayProxyResponse{

@@ -8,14 +8,16 @@ import (
 
 var _ UseCaseError = (*useCaseError)(nil)
 var _ UseCaseError = (*EntityNotFoundError)(nil)
+var _ UseCaseError = (*EntityDuplicateError)(nil)
 var _ UseCaseError = (*FatalError)(nil)
 
 /** Error type **/
 type ErrorType int
 
 const (
-	ErrorTypeNotFoundEntity ErrorType = iota
-	ErrorTypeFatal          ErrorType = iota
+	ErrorTypeNotFoundEntity  ErrorType = iota
+	ErrorTypeDuplicateEntity ErrorType = iota
+	ErrorTypeFatal           ErrorType = iota
 )
 
 /** Use case error **/
@@ -93,6 +95,46 @@ func (e EntityNotFoundError) EntityName() string {
 }
 
 func (e EntityNotFoundError) Params() map[string]string {
+	return e.params
+}
+
+/** EntityDuplicateError **/
+type EntityDuplicateError struct {
+	useCaseError
+	entityName string
+	params     map[string]string
+}
+
+func NewErrDuplicateEntity(entityName string, params map[string]string) EntityDuplicateError {
+	var paramStrs []string
+	for key, value := range params {
+		paramStrs = append(paramStrs, fmt.Sprintf("%s=%s", key, value))
+	}
+	message := fmt.Sprintf("%s is duplicate. params: %s", entityName, strings.Join(paramStrs, ", "))
+	return EntityDuplicateError{
+		useCaseError: newUseCaseError(ErrorTypeNotFoundEntity, message),
+		entityName:   entityName,
+		params:       params,
+	}
+}
+
+func ToErrDuplicateEntity(err UseCaseError) EntityDuplicateError {
+	if !IsErrNotFound(err) {
+		return NewErrDuplicateEntity("unknown", nil)
+	}
+	return err.(EntityDuplicateError)
+}
+
+func IsErrDuplicate(err error) bool {
+	var errType EntityDuplicateError
+	return errors.As(err, &errType)
+}
+
+func (e EntityDuplicateError) EntityName() string {
+	return e.entityName
+}
+
+func (e EntityDuplicateError) Params() map[string]string {
 	return e.params
 }
 
