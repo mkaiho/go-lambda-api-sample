@@ -67,6 +67,7 @@ func NewZapLogger(conf util.LoggerConfig) (util.Logger, error) {
 		c.EncoderConfig.TimeKey = "time"
 		c.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
 		c.EncoderConfig.CallerKey = "src"
+		c.OutputPaths = []string{"stdout"}
 		zapLogger, err := c.Build()
 		if err != nil {
 			return nil, err
