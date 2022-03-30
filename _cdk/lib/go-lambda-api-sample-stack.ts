@@ -5,12 +5,49 @@ import { aws_apigateway as apigateway } from "aws-cdk-lib";
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { StageContext } from './context';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { AccountRecovery, OAuthScope, UserPool, UserPoolEmail } from 'aws-cdk-lib/aws-cognito';
+
 export class GoLambdaApiSampleStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const env: string = this.node.tryGetContext("env");
-    const context: StageContext = this.node.tryGetContext(env);
+    const context: StageContext = this.context
+
+    /** User Pool */
+    const userPool = new UserPool(this, "test-user-pool", {
+      selfSignUpEnabled: true,
+      signInCaseSensitive: false,
+      autoVerify: { email: true },
+      userPoolName: "test-user-pool",
+      standardAttributes: {
+        familyName: { required: true, mutable: true },
+        givenName: { required: true, mutable: true },
+        email: { required: true, mutable: true }
+      },
+      userInvitation: {
+        emailSubject: "test",
+        // emailBody: "created user {username} {####}"
+      },
+      email: UserPoolEmail.withSES({
+        sesRegion: "ap-northeast-1",
+        fromEmail: context.ses.fromEmail
+      }),
+      accountRecovery: AccountRecovery.EMAIL_ONLY,
+      removalPolicy: RemovalPolicy.DESTROY
+    })
+    userPool.addClient("test-client", {
+      userPoolClientName: "test-client",
+      oAuth: {
+        scopes: [
+          OAuthScope.OPENID,
+          OAuthScope.OPENID,
+          OAuthScope.PROFILE,
+        ]
+      },
+      authFlows: {
+        userPassword: true
+      }
+    })
 
     /** functions **/
     const listUsers = new Function(this, "listUsers", {
@@ -272,7 +309,7 @@ export class GoLambdaApiSampleStack extends Stack {
         name: "id",
         type: AttributeType.STRING
       },
-      removalPolicy: RemovalPolicy.RETAIN
+      removalPolicy: RemovalPolicy.DESTROY
     })
     usersTable.grantFullAccess(listUsers)
     usersTable.grantFullAccess(createUser)
@@ -285,5 +322,15 @@ export class GoLambdaApiSampleStack extends Stack {
     // const queue = new sqs.Queue(this, 'GoLambdaApiSampleQueue', {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
+  }
+
+  private get context(): StageContext {
+    const env: string = this.node.tryGetContext("env");
+    const context: StageContext = this.node.tryGetContext(env);
+    context.ses = {
+      fromEmail: process.env["SES_FROM_EMAIL"] || ""
+    }
+
+    return context
   }
 }
