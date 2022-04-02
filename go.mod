@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.43.6
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
+	github.com/google/uuid v1.3.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/slack-go/slack v0.10.2
 	github.com/stretchr/testify v1.7.0
