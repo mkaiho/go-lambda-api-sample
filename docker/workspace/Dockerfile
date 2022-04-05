@@ -5,7 +5,7 @@ ARG NODE_VERSION=16.13.1
 ARG SRC_MODULE=github.com/mkaiho/go-lambda-api-sample
 
 RUN yum update -y && yum install -y \
-  sudo tar curl gcc make git zip unzip jq
+  sudo tar curl gcc make git zip unzip jq openssl
 
 RUN useradd "ec2-user" && echo "ec2-user ALL=NOPASSWD: ALL" >> /etc/sudoers
 
