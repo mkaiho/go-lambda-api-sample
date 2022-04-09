@@ -22,7 +22,7 @@ test-results/
 .ssh/
 
 # binary
-bin/
+/bin/
 
 # editor settings
 .vscode/

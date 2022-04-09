@@ -80,6 +80,27 @@ func (c *cognitoUserPoolClient) ConfirmSignUp(ctx context.Context, input userpoo
 	return nil
 }
 
+func (c *cognitoUserPoolClient) InitiateAuth(ctx context.Context, input userpool.InitiateAuthInput) (*userpool.InitiateAuthOutput, error) {
+	resp, err := c.cognito.InitiateAuthWithContext(ctx, &cognitoidentityprovider.InitiateAuthInput{
+		ClientId: &c.clientID,
+		AuthFlow: aws.String(cognitoidentityprovider.AuthFlowTypeUserPasswordAuth),
+		AuthParameters: map[string]*string{
+			"USERNAME": &input.Email,
+			"PASSWORD": &input.Password,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	out := userpool.InitiateAuthOutput{
+		IDToken:      resp.AuthenticationResult.IdToken,
+		AccessToken:  resp.AuthenticationResult.AccessToken,
+		RefreshToken: resp.AuthenticationResult.RefreshToken,
+	}
+	return &out, nil
+}
+
 func (c *cognitoUserPoolClient) ResendConfirmationCode(ctx context.Context, input userpool.ResendConfirmationCodeInput) error {
 	_, err := c.cognito.ResendConfirmationCodeWithContext(ctx, &cognitoidentityprovider.ResendConfirmationCodeInput{
 		ClientId: aws.String(c.clientID),

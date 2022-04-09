@@ -82,6 +82,19 @@ type (
 	}
 )
 
+/** InitiateAuth Input/Output **/
+type (
+	InitiateAuthInput struct {
+		Email    string
+		Password string
+	}
+	InitiateAuthOutput struct {
+		IDToken      *string
+		AccessToken  *string
+		RefreshToken *string
+	}
+)
+
 /** ConfirmSignUp Input/Output **/
 type (
 	ConfirmSignUpInput struct {
@@ -152,6 +165,7 @@ func (in *AdminCreateUserInput) Validate() error {
 type Client interface {
 	SignUp(ctx context.Context, input SignUpInput) (*SignUpOutput, error)
 	ConfirmSignUp(ctx context.Context, input ConfirmSignUpInput) error
+	InitiateAuth(ctx context.Context, input InitiateAuthInput) (*InitiateAuthOutput, error)
 	ResendConfirmationCode(ctx context.Context, input ResendConfirmationCodeInput) error
 	AdminCreateUser(ctx context.Context, input AdminCreateUserInput) (*AdminCreateUserOutput, error)
 	AdminUpdateUser(ctx context.Context, input AdminUpdateUserInput) error
