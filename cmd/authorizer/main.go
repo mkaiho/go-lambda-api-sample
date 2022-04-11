@@ -66,32 +66,37 @@ func handle(
 	event events.APIGatewayCustomAuthorizerRequest,
 ) (events.APIGatewayCustomAuthorizerResponse, error) {
 	var token = strings.Replace(event.AuthorizationToken, "Bearer ", "", 1)
-	var resp = events.APIGatewayCustomAuthorizerResponse{}
+	var resp = events.APIGatewayCustomAuthorizerResponse{
+		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
+			Version: "2012-10-17",
+			Statement: []events.IAMPolicyStatement{
+				{
+					Action:   []string{"execute-api:Invoke"},
+					Effect:   "Deny",
+					Resource: []string{event.MethodArn},
+				},
+			},
+		},
+	}
 
 	if initErr != nil {
+		util.GetLogger().Error(initErr, "failed to initialize")
 		return resp, nil
 	}
 
 	publicKey, err := tokenManager.ReadJWKSetFile("jwks.json")
 	if err != nil {
+		util.GetLogger().Error(err, "failed to read public key")
 		return resp, err
 	}
 
 	claims, err := tokenManager.VerifyWithKeySet([]byte(token), publicKey)
 	if err != nil {
+		util.GetLogger().Error(err, "invalid token")
 		return resp, nil
 	}
 
-	resp.PolicyDocument = events.APIGatewayCustomAuthorizerPolicy{
-		Version: "2012-10-17",
-		Statement: []events.IAMPolicyStatement{
-			{
-				Action:   []string{"execute-api:Invoke"},
-				Effect:   "Allow",
-				Resource: []string{event.MethodArn},
-			},
-		},
-	}
+	resp.PolicyDocument.Statement[0].Effect = "Allow"
 	resp.Context = map[string]interface{}{
 		"Claims": string(claims),
 	}

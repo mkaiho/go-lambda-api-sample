@@ -17,6 +17,7 @@ $(BIN_ZIP_DIR):
 	@test -d $(BIN_ZIP_DIR) || mkdir $(BIN_ZIP_DIR)
 $(ZIP_BINARIES): $(BINARIES)
 	@zip -j $@.zip $(@:$(BIN_ZIP_DIR)/%=$(BIN_DIR)/%)
+	@zip -j $@.zip jwks.json
 
 .PHONY: dev-deps
 dev-deps:
