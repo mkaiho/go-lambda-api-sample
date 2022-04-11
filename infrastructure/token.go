@@ -49,9 +49,11 @@ func NewTokenManagerConfig(
 
 type JWTManager interface {
 	ReadRSAPrivatePemFile(path string) (jwk.Key, error)
+	ReadJWKSetFile(path string) (jwk.Set, error)
 	GenerateToken(subject string) (jwt.Token, error)
 	Sign(token jwt.Token, key jwk.Key) ([]byte, error)
 	Verify(signed []byte, key jwk.Key) ([]byte, error)
+	VerifyWithKeySet(signed []byte, publicKeySet jwk.Set) ([]byte, error)
 }
 
 type jwtManager struct {
@@ -87,6 +89,19 @@ func (g *jwtManager) ReadRSAPrivatePemFile(path string) (jwk.Key, error) {
 	key.Set(jwk.KeyUsageKey, jwk.ForSignature)
 
 	return key, nil
+}
+
+func (g *jwtManager) ReadJWKSetFile(path string) (jwk.Set, error) {
+	pem, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	keySet, err := jwk.Parse(pem)
+	if err != nil {
+		return nil, err
+	}
+
+	return keySet, nil
 }
 
 func (g *jwtManager) GenerateToken(
@@ -131,4 +146,11 @@ func (g *jwtManager) Verify(
 	key jwk.Key,
 ) ([]byte, error) {
 	return jws.Verify(signed, jws.WithKey(jwa.RS256, key))
+}
+
+func (g *jwtManager) VerifyWithKeySet(
+	signed []byte,
+	publicKeySet jwk.Set,
+) ([]byte, error) {
+	return jws.Verify(signed, jws.WithKeySet(publicKeySet))
 }

@@ -50,6 +50,12 @@ export class GoLambdaApiSampleStack extends Stack {
     })
 
     /** functions **/
+    const authorizeToken = new Function(this, "authorizer", {
+      description: "authorize token",
+      code: Code.fromAsset('../bin/zip/authorizer.zip'),
+      handler: 'authorizer',
+      runtime: Runtime.GO_1_X,
+    })
     const listUsers = new Function(this, "listUsers", {
       description: "list users",
       code: Code.fromAsset('../bin/zip/list-users.zip'),
@@ -76,6 +82,10 @@ export class GoLambdaApiSampleStack extends Stack {
     })
 
     /** API **/
+    const authorizer = new apigateway.TokenAuthorizer(this, "testTokenAuthorizer", {
+      authorizerName: "testTokenAuthorizer",
+      handler: authorizeToken,
+    })
     const api = new apigateway.RestApi(this, "listUsersAPI", {
       restApiName: "testAPI",
       endpointTypes: [apigateway.EndpointType.REGIONAL],
@@ -104,6 +114,7 @@ export class GoLambdaApiSampleStack extends Stack {
         ]
       }),
       {
+        authorizer,
         methodResponses: [
           {
             statusCode: "200",
@@ -152,6 +163,7 @@ export class GoLambdaApiSampleStack extends Stack {
         ]
       }),
       {
+        authorizer,
         methodResponses: [
           {
             statusCode: "201",
@@ -212,6 +224,7 @@ export class GoLambdaApiSampleStack extends Stack {
         ]
       }),
       {
+        authorizer,
         requestParameters: {
           "method.request.path.userID": true
         },
@@ -272,6 +285,7 @@ export class GoLambdaApiSampleStack extends Stack {
         ]
       }),
       {
+        authorizer,
         requestParameters: {
           "method.request.path.userID": true
         },
