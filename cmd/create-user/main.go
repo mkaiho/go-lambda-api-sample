@@ -67,8 +67,8 @@ func handle(ctx context.Context, event events.APIGatewayProxyRequest) (events.AP
 	}
 	// repository
 	var (
-		idValidator entity.IDValidator = infrastructure.NewDummyIDValidator()
-		idGenerator entity.IDGenerator = infrastructure.NewDummyIDGenerator()
+		idValidator entity.IDValidator = infrastructure.NewULIDValidator()
+		idGenerator entity.IDGenerator = infrastructure.NewULIDGenerator()
 		idManager                      = entity.NewIDManager(idValidator, idGenerator)
 		usersWriter entity.UsersWriter = dynamodb.NewUsersWriter(idManager, dynamodbClient, dynamodbAttributeValueMapper)
 	)

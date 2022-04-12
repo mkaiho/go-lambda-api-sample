@@ -143,14 +143,6 @@ type createUserHandler struct {
 }
 
 func (h *createUserHandler) Handle(req CreateUserRequest) *CreateUserResponse {
-	userID, err := h.idm.From(req.User.ID)
-	if err != nil {
-		errResult, status := makeErrorResult(err)
-		return &CreateUserResponse{
-			Status: status,
-			Error:  errResult,
-		}
-	}
 	email, err := entity.NewEmail(req.User.Email)
 	if err != nil {
 		errResult, status := makeErrorResult(err)
@@ -159,7 +151,7 @@ func (h *createUserHandler) Handle(req CreateUserRequest) *CreateUserResponse {
 			Error:  errResult,
 		}
 	}
-	user, err := h.createUserUseCase.Create(entity.NewUser(userID, req.User.Name, email))
+	user, err := h.createUserUseCase.Create(entity.NewUser(h.idm.Generate(), req.User.Name, email))
 	if err != nil {
 		errResult, status := makeErrorResult(err)
 		return &CreateUserResponse{
