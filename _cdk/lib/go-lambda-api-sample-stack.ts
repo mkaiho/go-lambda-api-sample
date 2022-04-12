@@ -91,6 +91,7 @@ export class GoLambdaApiSampleStack extends Stack {
     const authorizer = new apigateway.TokenAuthorizer(this, "testTokenAuthorizer", {
       authorizerName: "testTokenAuthorizer",
       handler: authorizeToken,
+      resultsCacheTtl: Duration.millis(0)
     })
     const api = new apigateway.RestApi(this, "listUsersAPI", {
       restApiName: "testAPI",
