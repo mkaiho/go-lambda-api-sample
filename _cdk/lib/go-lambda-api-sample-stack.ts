@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { aws_apigateway as apigateway } from "aws-cdk-lib";
@@ -6,6 +6,7 @@ import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { StageContext } from './context';
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { AccountRecovery, OAuthScope, UserPool, UserPoolEmail } from 'aws-cdk-lib/aws-cognito';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 
 export class GoLambdaApiSampleStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -55,30 +56,35 @@ export class GoLambdaApiSampleStack extends Stack {
       code: Code.fromAsset('../bin/zip/authorizer.zip'),
       handler: 'authorizer',
       runtime: Runtime.GO_1_X,
+      logRetention: RetentionDays.THREE_DAYS,
     })
     const listUsers = new Function(this, "listUsers", {
       description: "list users",
       code: Code.fromAsset('../bin/zip/list-users.zip'),
       handler: 'list-users',
       runtime: Runtime.GO_1_X,
+      logRetention: RetentionDays.THREE_DAYS,
     })
     const createUser = new Function(this, "createUser", {
       description: "create user",
       code: Code.fromAsset('../bin/zip/create-user.zip'),
       handler: 'create-user',
       runtime: Runtime.GO_1_X,
+      logRetention: RetentionDays.THREE_DAYS,
     })
     const getUser = new Function(this, "getUser", {
       description: "get user by id",
       code: Code.fromAsset('../bin/zip/get-user.zip'),
       handler: 'get-user',
       runtime: Runtime.GO_1_X,
+      logRetention: RetentionDays.THREE_DAYS,
     })
     const deleteUser = new Function(this, "deleteUser", {
       description: "delete user by id",
       code: Code.fromAsset('../bin/zip/delete-user.zip'),
       handler: 'delete-user',
       runtime: Runtime.GO_1_X,
+      logRetention: RetentionDays.THREE_DAYS,
     })
 
     /** API **/
