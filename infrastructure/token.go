@@ -2,6 +2,8 @@ package infrastructure
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -11,6 +13,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jws"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/mkaiho/go-lambda-api-sample/entity"
+	"github.com/mkaiho/go-lambda-api-sample/util"
 )
 
 type TokenManagerConfig interface {
@@ -152,5 +155,39 @@ func (g *jwtManager) VerifyWithKeySet(
 	signed []byte,
 	publicKeySet jwk.Set,
 ) ([]byte, error) {
-	return jws.Verify(signed, jws.WithKeySet(publicKeySet))
+	payload, err := jwt.Parse(signed, jwt.WithKeySet(publicKeySet))
+	if err != nil {
+		return nil, err
+	}
+	if !g.isValidAudience(payload.Audience()) {
+		return nil, errors.New("invalid audience")
+	}
+	if payload.Issuer() != g.issuer {
+		return nil, errors.New("invalid issuer")
+	}
+
+	buff, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return buff, nil
+}
+
+func (g *jwtManager) isValidAudience(vs []string) bool {
+	util.GetLogger().Info("check udience", "aud", g.audience, "vs", vs)
+	for _, aud := range g.audience {
+		isMatch := false
+		for _, v := range vs {
+			if aud == v {
+				isMatch = true
+				break
+			}
+		}
+		if !isMatch {
+			return false
+		}
+	}
+
+	return true
 }
