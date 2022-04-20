@@ -53,35 +53,35 @@ export class GoLambdaApiSampleStack extends Stack {
     /** functions **/
     const authorizeToken = new Function(this, "authorizer", {
       description: "authorize token",
-      code: Code.fromAsset('../bin/zip/authorizer.zip'),
+      code: Code.fromAsset('../bin/zip/lambda/authorizer.zip'),
       handler: 'authorizer',
       runtime: Runtime.GO_1_X,
       logRetention: RetentionDays.THREE_DAYS,
     })
     const listUsers = new Function(this, "listUsers", {
       description: "list users",
-      code: Code.fromAsset('../bin/zip/list-users.zip'),
+      code: Code.fromAsset('../bin/zip/lambda/list-users.zip'),
       handler: 'list-users',
       runtime: Runtime.GO_1_X,
       logRetention: RetentionDays.THREE_DAYS,
     })
     const createUser = new Function(this, "createUser", {
       description: "create user",
-      code: Code.fromAsset('../bin/zip/create-user.zip'),
+      code: Code.fromAsset('../bin/zip/lambda/create-user.zip'),
       handler: 'create-user',
       runtime: Runtime.GO_1_X,
       logRetention: RetentionDays.THREE_DAYS,
     })
     const getUser = new Function(this, "getUser", {
       description: "get user by id",
-      code: Code.fromAsset('../bin/zip/get-user.zip'),
+      code: Code.fromAsset('../bin/zip/lambda/get-user.zip'),
       handler: 'get-user',
       runtime: Runtime.GO_1_X,
       logRetention: RetentionDays.THREE_DAYS,
     })
     const deleteUser = new Function(this, "deleteUser", {
       description: "delete user by id",
-      code: Code.fromAsset('../bin/zip/delete-user.zip'),
+      code: Code.fromAsset('../bin/zip/lambda/delete-user.zip'),
       handler: 'delete-user',
       runtime: Runtime.GO_1_X,
       logRetention: RetentionDays.THREE_DAYS,

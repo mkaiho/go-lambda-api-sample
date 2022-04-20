@@ -1,22 +1,24 @@
-BIN_DIR:=bin
-BIN_ZIP_DIR:=$(BIN_DIR)/zip
 ROOT_PACKAGE:=github.com/mkaiho/go-lambda-api-sample
-COMMAND_PACKAGES:=$(shell go list ./cmd/...)
-BINARIES := $(COMMAND_PACKAGES:$(ROOT_PACKAGE)/cmd/%=$(BIN_DIR)/%)
-ZIP_BINARIES := $(BINARIES:$(BIN_DIR)/%=$(BIN_ZIP_DIR)/%)
+BIN_DIR:=bin
+SRC_DIR:=$(shell go list ./cmd/... ./lambda/...)
+BINARIES:=$(SRC_DIR:$(ROOT_PACKAGE)/%=$(BIN_DIR)/%)
+ARCHIVE_DIR:=$(BIN_DIR)/zip
+ARCHIVES:=$(SRC_DIR:$(ROOT_PACKAGE)/%=$(ARCHIVE_DIR)/%)
 
 .PHONY: build
 build: clean $(BINARIES)
 
-$(BINARIES): $(GO_FILES)
-	@go build -o $@ $(@:$(BIN_DIR)/%=$(ROOT_PACKAGE)/cmd/%)
+$(BINARIES):
+	go build  -o $@ $(@:$(BIN_DIR)/%=$(ROOT_PACKAGE)/%)
 
-.PHONY: zip
-zip: clean build $(BIN_ZIP_DIR) $(ZIP_BINARIES)
-$(BIN_ZIP_DIR):
-	@test -d $(BIN_ZIP_DIR) || mkdir $(BIN_ZIP_DIR)
-$(ZIP_BINARIES): $(BINARIES)
-	@zip -j $@.zip $(@:$(BIN_ZIP_DIR)/%=$(BIN_DIR)/%)
+.PHONY: archive
+archive: $(ARCHIVES)
+
+$(ARCHIVES):$(BINARIES)
+	@test -d $(ARCHIVE_DIR) || mkdir $(ARCHIVE_DIR)
+	@test -d $(ARCHIVE_DIR)/lambda || mkdir $(ARCHIVE_DIR)/lambda
+	@test -d $(ARCHIVE_DIR)/cmd || mkdir $(ARCHIVE_DIR)/cmd
+	@zip -j $@.zip $(@:$(ARCHIVE_DIR)/%=$(BIN_DIR)/%)
 	@zip -j $@.zip jwks.json
 
 .PHONY: dev-deps
